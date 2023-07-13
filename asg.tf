@@ -24,24 +24,23 @@ resource "aws_security_group" "ec2_sg" {
   vpc_id      = data.aws_vpc.main.id
 
   ingress {
-    protocol    = "tcp"
-    from_port   = 32768
-    to_port     = 65535
+    protocol  = "tcp"
+    from_port = 32768
+    to_port   = 65535
+    # to_port     = 32768
     description = "Access from ALB"
 
-
     #???
-    security_groups = [
-      "${aws_security_group.load_balancer_security_group.id}",
-    ]
+    # sgr-0012fe286def3c352
+    security_groups = [aws_security_group.load_balancer_security_group.id]
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # egress {
+  #   from_port   = 0
+  #   to_port     = 0
+  #   protocol    = "-1"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
 
   lifecycle {
     create_before_destroy = true

@@ -1,6 +1,6 @@
 stage = demo
 
-export TF_WORKSPACE=demo-$(stage)
+export TF_WORKSPACE=$(stage)
 
 init:
 	terraform init -var-file=var-$(stage).tfvars
