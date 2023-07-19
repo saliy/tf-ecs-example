@@ -1,4 +1,4 @@
-stage = demo
+stage = demo1
 
 export TF_WORKSPACE=$(stage)
 

@@ -24,6 +24,11 @@ variable "app_port" {
   default = 80
 }
 
+# variable "redis_port" {
+#   type    = number
+#   default = 6379
+# }
+
 variable "main_instance_type" {
   type    = string
   default = "t2.medium"
