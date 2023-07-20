@@ -23,6 +23,8 @@ resource "aws_ecs_task_definition" "task_definition" {
 
   memory = 1024
 
+  // bitnami/redis:6.2.5 Healthcheck:
+  // GET https:/[host][:port]/v1/crdbs/<crdb_guid>/health_report
   container_definitions = jsonencode([
     {
       name      = "backend-redis",
@@ -42,7 +44,6 @@ resource "aws_ecs_task_definition" "task_definition" {
           "containerPort" : 6379
         }
       ]
-
     },
     {
       name      = "backend",
@@ -50,7 +51,7 @@ resource "aws_ecs_task_definition" "task_definition" {
       essential = true,
       memory    = 128,
       healthCheck = {
-        command : ["CMD-SHELL", "curl -f http://localhost:${var.app_port}${var.healthcheck_url} || exit 1"],
+        command : ["CMD-SHELL", "curl --fail http://localhost:${var.app_port}${var.healthcheck_url} || exit 1"],
         startPeriod : 20
       },
       logConfiguration = {
@@ -82,9 +83,9 @@ resource "aws_ecs_service" "web" {
   deployment_maximum_percent = 400
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.lb_target_group.arn
+    target_group_arn = aws_lb_target_group.lb-tg.arn
     container_name   = "backend"
-    container_port   = 80
+    container_port   = var.app_port
   }
 
   force_new_deployment              = false

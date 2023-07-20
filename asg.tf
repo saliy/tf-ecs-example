@@ -20,20 +20,34 @@ data "aws_ami" "amazon_linux" {
 
 resource "aws_security_group" "ec2_sg" {
   name_prefix = "allow-all-ec2-"
-  description = "allow all"
+  description = "allow all traffic"
   vpc_id      = data.aws_vpc.main.id
 
+  # ingress {
+  #   from_port       = 80
+  #   to_port         = 80
+  #   protocol        = "tcp"
+  #   description     = "Port 80 Access from ALB"
+  #   security_groups = [aws_security_group.lb-sg.id]
+  # }
+
+  # ingress {
+  #   from_port       = 443
+  #   to_port         = 443
+  #   protocol        = "tcp"
+  #   description     = "HTTPS Access from ALB to download Docker Images"
+  #   security_groups = [aws_security_group.lb-sg.id]
+  # }
+
   ingress {
-    protocol    = "tcp"
-    from_port   = 32768
-    to_port     = 65535
-    description = "Access from ALB"
-
-
-    #???
-    security_groups = [
-      "${aws_security_group.load_balancer_security_group.id}",
-    ]
+    from_port   = 0 //32768
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    # ipv6_cidr_blocks = ["::/0"]
+    # description     = "Allow 32k+ traffic from alb"
+    description     = "Allow all traffic from alb and vpc"
+    security_groups = [aws_default_security_group.default.id, aws_security_group.lb-sg.id]
   }
 
   egress {
@@ -41,6 +55,9 @@ resource "aws_security_group" "ec2_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    # ipv6_cidr_blocks = ["::/0"]
+    description     = "Allow all traffic to alb and vpc"
+    security_groups = [aws_default_security_group.default.id, aws_security_group.lb-sg.id]
   }
 
   lifecycle {
@@ -93,7 +110,7 @@ resource "aws_autoscaling_group" "asg" {
 
   availability_zones = local.aws_availability_zones_with_preferred_instances
 
-  target_group_arns     = [aws_lb_target_group.lb_target_group.arn]
+  target_group_arns     = [aws_lb_target_group.lb-tg.arn]
   protect_from_scale_in = true
 
   lifecycle {
