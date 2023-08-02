@@ -27,7 +27,7 @@ resource "aws_security_group" "ec2_sg" {
   #   from_port       = 80
   #   to_port         = 80
   #   protocol        = "tcp"
-  #   description     = "Port 80 Access from ALB"
+  #   description     = "HTTP 80 Access from ALB"
   #   security_groups = [aws_security_group.lb-sg.id]
   # }
 
@@ -39,6 +39,14 @@ resource "aws_security_group" "ec2_sg" {
   #   security_groups = [aws_security_group.lb-sg.id]
   # }
 
+  # ingress {
+  #   from_port       = 22
+  #   to_port         = 22
+  #   protocol        = "tcp"
+  #   description     = "SSH Access"
+  #   security_groups = [aws_security_group.lb-sg.id]
+  # }
+
   ingress {
     from_port   = 0 //32768
     to_port     = 0
@@ -47,7 +55,7 @@ resource "aws_security_group" "ec2_sg" {
     # ipv6_cidr_blocks = ["::/0"]
     # description     = "Allow 32k+ traffic from alb"
     description     = "Allow all traffic from alb and vpc"
-    security_groups = [aws_default_security_group.default.id, aws_security_group.lb-sg.id]
+    security_groups = [aws_default_security_group.default.id, aws_security_group.lb-sg.id, aws_security_group.ecc-sg.id]
   }
 
   egress {
@@ -57,7 +65,7 @@ resource "aws_security_group" "ec2_sg" {
     cidr_blocks = ["0.0.0.0/0"]
     # ipv6_cidr_blocks = ["::/0"]
     description     = "Allow all traffic to alb and vpc"
-    security_groups = [aws_default_security_group.default.id, aws_security_group.lb-sg.id]
+    security_groups = [aws_default_security_group.default.id, aws_security_group.lb-sg.id, aws_security_group.ecc-sg.id]
   }
 
   lifecycle {

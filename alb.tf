@@ -12,10 +12,10 @@ resource "aws_lb" "test-lb" {
 resource "aws_security_group" "lb-sg" {
   name_prefix = "lb-sg"
   vpc_id      = data.aws_vpc.main.id
-  description = "Allow 443 and 80 traffic lb-sg"
+  description = "Allow 443 and 80 traffic to application load balancer"
 
   ingress {
-    description = "Allow 443 from anywhere"
+    description = "Allow 443 from anywhere for redirection"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -31,23 +31,6 @@ resource "aws_security_group" "lb-sg" {
     cidr_blocks = ["0.0.0.0/0"]
     # ipv6_cidr_blocks = ["::/0"]
   }
-
-  # ingress {
-  #   description      = "Allow 32k-33k for app traffic"
-  #   from_port        = 32700 #32768
-  #   to_port          = 33000
-  #   protocol         = "tcp"
-  #   cidr_blocks      = ["0.0.0.0/0"]
-  #   ipv6_cidr_blocks = ["::/0"]
-  # }
-
-  # ingress {
-  #   description = "Allow 32k traffic"
-  #   from_port   = 0
-  #   to_port     = 65535
-  #   protocol    = "tcp"
-  #   cidr_blocks = ["0.0.0.0/0"]
-  # }
 
   egress {
     from_port   = 0
@@ -78,10 +61,9 @@ resource "aws_lb_target_group" "lb-tg" {
   slow_start             = 30
 
   health_check {
-    # path = "/healthz"
-    #          healthy_threshold   = 2
-    # path                = "${var.healthcheck_url}?target_group=1"
-    path                = var.healthcheck_url
+    # healthy_threshold   = 2
+    path = "${var.healthcheck_url}?target_group=1"
+    # path                = var.healthcheck_url
     port                = "traffic-port"
     unhealthy_threshold = 3
     interval            = 30
@@ -94,7 +76,6 @@ resource "aws_lb_target_group" "lb-tg" {
 
   depends_on = [aws_lb.test-lb]
 }
-
 
 resource "aws_lb_listener" "web-listener" {
   load_balancer_arn = aws_lb.test-lb.arn
